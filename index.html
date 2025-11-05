@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英単語トレーナー</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: #f5f7fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 40px;
+    width: 90%;
+    max-width: 480px;
+    text-align: center;
+  }
+
+  #progress {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 1rem;
+  }
+
+  #word {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1.2rem;
+  }
+
+  #meaning {
+    font-size: 1.3rem;
+    color: #333;
+    min-height: 2em;
+    margin-bottom: 1.8rem;
+  }
+
+  button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #0056b3;
+  }
+
+  #endMessage {
+    color: #e63946;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 25px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div id="progress">問題数：0 / 0</div>
+  <div id="word">クリックで開始</div>
+  <div id="meaning"></div>
+  <button id="nextBtn">次へ</button>
+  <div id="endMessage"></div>
+</div>
+
+<script>
+  const words = [
+      ["field","分野、領域:(畑、競技場)"],
+      ["following","次の、以下の"],
+      ["various", "さまざまな、多様な"],
+      ["several", "いくつかの"],
+      ["local", "地元の、現地の:（各駅停車の）"],
+      ["related", "関連して:（親類関係で）"],
+      ["possible", "可能な:（あり得る）"],
+      ["similar", "似ている、同様の"],
+      ["concerned", "心配して:（関心を持って）"],
+      ["available", "利用できる、手に入る"],
+      ["dry", "雨の少ない、乾燥した:（乾いた）"],
+      ["past", "過ぎたばかりの、この前の:（過去の）"],
+      ["modern", "近代的な、最新の:（現代の、近代の）"],
+      ["unique", "特有の:（唯一の、格別の）"],
+      ["common", "よくある、普通の:（共通の）"],
+      ["prepare", "（を）準備「用意」する:（食事を作る）"],
+      ["regard", "を（〜と）思う、考える"],
+      ["occur", "（予期せず）起こる:（場所・状況などに）"],
+      ["suppose", "だと思う、考える"],
+      ["serve", "（食事）を出す:（に役立つ、のために勤務する）"],
+      ["wonder", "だろうかと思う:（驚く）"],
+      ["reduce", "を減らす:（減る）"],
+      ["promote", "を促進する:（を昇進させる）"],
+      ["survive", "（を）生き延びる、切り抜ける"],
+      ["gain", "を（徐々に）得る:（を増す）"],
+      ["divide", "を分ける、分かれる"],
+      ["attract", "（人・もの）を引き寄せる:（関心などを引く）"],
+      ["achieve", "を達成する:（獲得する、成功を収める）"],
+      ["fit", "（に）適する、合致する:（合う）"],
+      ["reveal", "を明らかにする"],
+      ["wish", "（を）願う:（を祈る）"],
+      ["fill", "を満たす:（いっぱいになる）"],
+      ["hurt", "を気づつける、害する:（痛む）"],
+      ["discover", "を知る、がわかる:（を発見する、見つける）"],
+      ["indicate", "を示す:（を指し示す、の徴候を示す）"],
+      ["overcome", "を克服する、に打ち勝つ"],
+      ["protect", "を守る、保護する"],
+      ["remove", "を取り去る、稼働させる:（を取り除く、を脱ぐ、外す）"],
+      ["rely", "を当てにする、に頼る"],
+      ["bother", "わざわざ・・・する:（面倒をかける、を悩ませる）"],
+      ["seek", "（を）追い求める:（を得ようとする）"],
+      ["matter", "（が）重要「問題」だ"],
+      ["concentrate", "集中する、専念する"],
+      ["react", "反応「対応」する"],
+      ["struggle", "奮闘する:（人ともみ合う）"],
+      ["admit", "（を）（しぶしぶ）認める"],
+      ["lock", "をしまい込む、閉じ込める:（かぎをかける、かぎがかかる）"],
+      ["issue", "問題（点）:（発行、発行物）"],
+      ["relationship", "関係"],
+      ["list", "リスト、一覧（表）"],
+      ["item", "1品、1点:（項目、品目）"],
+      ["distance", "距離:（遠距離）"],
+      ["case", "場合:（事例、実情、事件、訴訟）"],
+      ["opinion", "意見、見解"],
+      ["century", "〜世紀"],
+      ["trouble", "困難（な事態）、困りごと:（面倒、もめごと）"],
+      ["total", "合計"],
+      ["advantage", "有利な点、強み:（長所）"],
+      ["detail", "細部:（詳細）"],
+      ["moment", "時点:（瞬間）"],
+      ["bill", "請求書:（紙幣）"],
+      ["rest", "残り:（休息、休止）"],
+      ["deal", "量:（取引）"],
+      ["feature", "特徴:（顔立ち、目鼻立ち）"],
+      ["survey", "調査"],
+      ["destination", "目的地、行き先"],
+      ["conclusion", "結論"],
+      ["attitude", "態度、考え方"],
+      ["impact", "影響（力）、衝撃"],
+      ["source", "源、原因:（出所）"],
+      ["row", "列、並び:（座席の列）"],
+      ["assistant", "助手、補佐"],
+      ["impression", "印象:（感じ）"],
+      ["noise", "騒音:（物音、音）"],
+      ["sign", "兆し、表れ:（しるし、標識、合図）"],
+      ["aim", "目的、目標:（狙い）"],
+      ["occasion", "（特定の）時:（機会、出来事）"],
+      ["relation", "関係、関連"],
+      ["signal", "合図:（信号、信号機）"],
+      ["balance", "バランス、均衡:（平衡「感覚」）"],
+      ["track", "小道"],
+      ["symbol", "象徴、シンボル:（記号）"],
+      ["circle", "仲間:（円、輪）"],
+      ["leisure", "余暇、自由な時間"],
+      ["angle", "観点、見方:（角度）"],
+      ["comfortable", "快適な:（心地よい）"],
+      ["recent", "最近の"],
+      ["real", "現実の、実在する:（真の、本物の）"],
+      ["dangerous", "危険な"],
+      ["current", "現在の、今の:（最新の）"],
+      ["final", "最後の:（最終的な）"],
+      ["obvious", "明らかな"],
+      ["fair", "妥当な、適正な:（公平な）"],
+      ["proud", "誇りに思って:（プライドの高い）"],
+      ["anxious", "切望して:（心配して、不安で）"],
+      ["impossible", "不可能な"],
+      ["opposite", "反対側の、向かい側の:（反対の）"],
+      ["terrible", "ひどい、恐ろしい"],
+      ["thick", "厚い:（濃い）"],
+      ["narrow", "狭い、細い:（ぎりぎりの、かろうじての）"]
+  ];
+
+  let order = [];
+  let current = -1;  // まだ出題していない状態
+  let showingMeaning = false;
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function updateProgress() {
+    const progressEl = document.getElementById("progress");
+    const total = words.length;
+    const count = current + 1; // 英単語を出した時点でカウント
+    progressEl.textContent = `問題数：${Math.min(count, total)} / ${total}`;
+  }
+
+  function nextWord() {
+    const wordDiv = document.getElementById("word");
+    const meaningDiv = document.getElementById("meaning");
+    const endDiv = document.getElementById("endMessage");
+
+    if (words.length === 0) {
+      wordDiv.textContent = "単語リストが空です";
+      meaningDiv.textContent = "コード内の words[] に単語を追加してください。";
+      return;
+    }
+
+    // 新しい周の開始
+    if (order.length === 0) {
+      order = [...Array(words.length).keys()];
+      shuffle(order);
+      current = -1;
+      endDiv.textContent = "";
+    }
+
+    if (!showingMeaning) {
+      // 新しい単語を出題
+      current++;
+      if (current >= order.length) {
+        order = [];
+        endDiv.textContent = "終了";
+        updateProgress();
+        return;
+      }
+      const [en,] = words[order[current]];
+      wordDiv.textContent = en;
+      meaningDiv.textContent = "";
+      showingMeaning = true;
+    } else {
+      // 日本語訳を表示
+      const [, jp] = words[order[current]];
+      meaningDiv.textContent = jp;
+      showingMeaning = false;
+    }
+
+    updateProgress();
+  }
+
+  document.getElementById("nextBtn").addEventListener("click", nextWord);
+  updateProgress();
+</script>
+
+</body>
+</html>
