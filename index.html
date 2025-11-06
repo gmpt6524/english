@@ -1,248 +1,361 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>英単語トレーナー</title>
-<style>
-  body {
-    font-family: "Segoe UI", sans-serif;
-    background: #f5f7fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-  }
-
-  .card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    padding: 40px;
-    width: 90%;
-    max-width: 480px;
-    text-align: center;
-  }
-
-  #progress {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 1rem;
-  }
-
-  #word {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 1.2rem;
-  }
-
-  #meaning {
-    font-size: 1.3rem;
-    color: #333;
-    min-height: 2em;
-    margin-bottom: 1.8rem;
-  }
-
-  button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background: #0056b3;
-  }
-
-  #endMessage {
-    color: #e63946;
-    font-size: 2rem;
-    font-weight: bold;
-    margin-top: 25px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>英単語勉強</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f4f4f4;
+      margin: 0;
+    }
+    .box {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      min-width: 300px;
+    }
+    button {
+      margin: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+      background-color: #0078d7;
+      color: white;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    #word {
+      font-size: 32px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 20px;
+    }
+    #translation {
+      font-size: 24px;
+      color: #666;
+      margin-top: 15px;
+      min-height: 30px;
+    }
+    #counter {
+      font-size: 14px;
+      color: gray;
+      margin-top: 10px;
+    }
+    #nextBtn {
+      display: none;
+      margin-top: 20px;
+      background-color: #16a34a;
+    }
+    #nextBtn:hover {
+      background-color: #15803d;
+    }
+    .end {
+      color: red;
+      font-size: 28px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
+  <div class="box">
+    <div id="word">モードを選択してください</div>
+    <div id="translation"></div>
+    <div id="buttons">
+      <button onclick="startGame('english')">英単語</button>
+      <button onclick="startGame('predicate')">述語</button>
+      <button onclick="startGame('mixed')">混合</button>
+    </div>
+    <button id="nextBtn" onclick="nextStep()">次へ</button>
+    <div id="counter"></div>
+  </div>
 
-<div class="card">
-  <div id="progress">問題数：0 / 0</div>
-  <div id="word">クリックで開始</div>
-  <div id="meaning"></div>
-  <button id="nextBtn">次へ</button>
-  <div id="endMessage"></div>
-</div>
+  <script>
+    const englishWords = [
+    ["field","分野、領域:(畑、競技場)"],
+    ["following","次の、以下の"],
+    ["various","さまざまな、多様な"],
+    ["several","いくつかの"],
+    ["local","地元の、現地の:(各駅停車の)"],
+    ["related","関連して:(親類関係で)"],
+    ["possible","可能な:(あり得る)"],
+    ["similar","似ている、同様の"],
+    ["concerned","心配して:(関心を持って)"],
+    ["available","利用できる、手に入る"],
+    ["dry","雨の少ない、乾燥した:(乾いた)"],
+    ["past","過ぎたばかりの、この前の:(過去の)"],
+    ["modern","近代的な、最新の:(現代の、近代の)"],
+    ["unique","特有の:(唯一の、格別の)"],
+    ["common","よくある、普通の:(共通の)"],
+    ["prepare","（を）準備「用意」する:(食事を作る)"],
+    ["regard","を（〜と）思う、考える"],
+    ["occur","（予期せず）起こる:(場所・状況などに)"],
+    ["suppose","だと思う、考える"],
+    ["serve","（食事）を出す:(に役立つ、のために勤務する)"],
+    ["wonder","だろうかと思う:(驚く)"],
+    ["reduce","を減らす:(減る)"],
+    ["promote","を促進する:(を昇進させる)"],
+    ["survive","（を）生き延びる、切り抜ける"],
+    ["gain","を（徐々に）得る:(を増す)"],
+    ["divide","を分ける、分かれる"],
+    ["attract","（人・もの）を引き寄せる:(関心などを引く)"],
+    ["achieve","を達成する:(獲得する、成功を収める)"],
+    ["fit","（に）適する、合致する:(合う)"],
+    ["reveal","を明らかにする"],
+    ["wish","（を）願う:(を祈る)"],
+    ["fill","を満たす:(いっぱいになる)"],
+    ["hurt","を気づつける、害する:(痛む)"],
+    ["discover","を知る、がわかる:(を発見する、見つける)"],
+    ["indicate","を示す:(を指し示す、の徴候を示す)"],
+    ["overcome","を克服する、に打ち勝つ"],
+    ["protect","を守る、保護する"],
+    ["remove","を取り去る、稼働させる:(を取り除く、を脱ぐ、外す)"],
+    ["rely","を当てにする、に頼る"],
+    ["bother","わざわざ・・・する:(面倒をかける、を悩ませる)"],
+    ["seek","（を）追い求める:(を得ようとする)"],
+    ["matter","（が）重要「問題」だ"],
+    ["concentrate","集中する、専念する"],
+    ["react","反応「対応」する"],
+    ["struggle","奮闘する:(人ともみ合う)"],
+    ["admit","（を）（しぶしぶ）認める"],
+    ["lock","をしまい込む、閉じ込める:(かぎをかける、かぎがかかる)"],
+    ["issue","問題（点）:(発行、発行物)"],
+    ["relationship","関係"],
+    ["list","リスト、一覧（表）"],
+    ["item","1品、1点:(項目、品目)"],
+    ["distance","距離:(遠距離)"],
+    ["case","場合:(事例、実情、事件、訴訟)"],
+    ["opinion","意見、見解"],
+    ["century","〜世紀"],
+    ["trouble","困難（な事態）、困りごと:(面倒、もめごと)"],
+    ["total","合計"],
+    ["advantage","有利な点、強み:(長所)"],
+    ["detail","細部:(詳細)"],
+    ["moment","時点:(瞬間)"],
+    ["bill","請求書:(紙幣)"],
+    ["rest","残り:(休息、休止)"],
+    ["deal","量:(取引)"],
+    ["feature","特徴:(顔立ち、目鼻立ち)"],
+    ["survey","調査"],
+    ["destination","目的地、行き先"],
+    ["conclusion","結論"],
+    ["attitude","態度、考え方"],
+    ["impact","影響（力）、衝撃"],
+    ["source","源、原因:(出所)"],
+    ["row","列、並び:(座席の列)"],
+    ["assistant","助手、補佐"],
+    ["impression","印象:(感じ)"],
+    ["noise","騒音:(物音、音)"],
+    ["sign","兆し、表れ:(しるし、標識、合図)"],
+    ["aim","目的、目標:(狙い)"],
+    ["occasion","（特定の）時:(機会、出来事)"],
+    ["relation","関係、関連"],
+    ["signal","合図:(信号、信号機)"],
+    ["balance","バランス、均衡:(平衡「感覚」)"],
+    ["track","小道"],
+    ["symbol","象徴、シンボル:(記号)"],
+    ["circle","仲間:(円、輪)"],
+    ["leisure","余暇、自由な時間"],
+    ["angle","観点、見方:(角度)"],
+    ["comfortable","快適な:(心地よい)"],
+    ["recent","最近の"],
+    ["real","現実の、実在する:(真の、本物の)"],
+    ["dangerous","危険な"],
+    ["current","現在の、今の:(最新の)"],
+    ["final","最後の:(最終的な)"],
+    ["obvious","明らかな"],
+    ["fair","妥当な、適正な:(公平な)"],
+    ["proud","誇りに思って:(プライドの高い)"],
+    ["anxious","切望して:(心配して、不安で)"],
+    ["impossible","不可能な"],
+    ["opposite","反対側の、向かい側の:(反対の)"],
+    ["terrible","ひどい、恐ろしい"],
+    ["thick","厚い:(濃い)"],
+    ["narrow","狭い、細い:(ぎりぎりの、かろうじての)"],
+    ["actually","実際に:(実は)"],
+    ["especially","特に、とりわけ"],
+    ["perhaps","もしかしたら(・・・かもしれない)"],
+    ["fortunately","幸運にも"],
+    ["less","より少なく"],
+    ["least","最も・・・でない"],
+    ["abroad","外国に「で」"],
+    ["overseas","海外へ「に、で」"],
+    ["rather","むしろ"],
+    ["probably","たぶん(・・・だろう)"],
+    ["easily","たやすく、簡単に"],
+    ["quite","かなり:(まったく、すっかり)"],
+    ["exactly","正確に、まさに:(正確には)"],
+    ["instead","その代わりに:(そうではなくて)"],
+    ["immediately","直ちに"],
+    ["somewhere","どこかに「へ、で」"],
+    ["gradually","徐々に、だんだんと"],
+    ["simply","単に:(まったく、とても、簡単に)"],
+    ["indeed","確かに、本当に:(実に)"],
+    ["whether","・・・かどうか:(・・・であろうとなかろうと)"],
+    ["also","そのうえ:(・・・もまた)"],
+    ["moreover","その上、さらに"],
+    ["besides","その上(なんといっても)"],
+    ["though","でも、だけど"],
+    ["however","しかしながら:(どんなに・・・でも)"],
+    ["although","・・・だけれども、・・・にもかかわらず"],
+    ["true","本当の、真実の"],
+    ["because","なぜなら、・・・なので"],
+    ["therefore","したがって、それゆえ"],
+    ["anyway","いずれにしても"]
+    ];
 
-<script>
-  const words = [
-      ["field","分野、領域:(畑、競技場)"],
-      ["following","次の、以下の"],
-      ["various", "さまざまな、多様な"],
-      ["several", "いくつかの"],
-      ["local", "地元の、現地の:（各駅停車の）"],
-      ["related", "関連して:（親類関係で）"],
-      ["possible", "可能な:（あり得る）"],
-      ["similar", "似ている、同様の"],
-      ["concerned", "心配して:（関心を持って）"],
-      ["available", "利用できる、手に入る"],
-      ["dry", "雨の少ない、乾燥した:（乾いた）"],
-      ["past", "過ぎたばかりの、この前の:（過去の）"],
-      ["modern", "近代的な、最新の:（現代の、近代の）"],
-      ["unique", "特有の:（唯一の、格別の）"],
-      ["common", "よくある、普通の:（共通の）"],
-      ["prepare", "（を）準備「用意」する:（食事を作る）"],
-      ["regard", "を（〜と）思う、考える"],
-      ["occur", "（予期せず）起こる:（場所・状況などに）"],
-      ["suppose", "だと思う、考える"],
-      ["serve", "（食事）を出す:（に役立つ、のために勤務する）"],
-      ["wonder", "だろうかと思う:（驚く）"],
-      ["reduce", "を減らす:（減る）"],
-      ["promote", "を促進する:（を昇進させる）"],
-      ["survive", "（を）生き延びる、切り抜ける"],
-      ["gain", "を（徐々に）得る:（を増す）"],
-      ["divide", "を分ける、分かれる"],
-      ["attract", "（人・もの）を引き寄せる:（関心などを引く）"],
-      ["achieve", "を達成する:（獲得する、成功を収める）"],
-      ["fit", "（に）適する、合致する:（合う）"],
-      ["reveal", "を明らかにする"],
-      ["wish", "（を）願う:（を祈る）"],
-      ["fill", "を満たす:（いっぱいになる）"],
-      ["hurt", "を気づつける、害する:（痛む）"],
-      ["discover", "を知る、がわかる:（を発見する、見つける）"],
-      ["indicate", "を示す:（を指し示す、の徴候を示す）"],
-      ["overcome", "を克服する、に打ち勝つ"],
-      ["protect", "を守る、保護する"],
-      ["remove", "を取り去る、稼働させる:（を取り除く、を脱ぐ、外す）"],
-      ["rely", "を当てにする、に頼る"],
-      ["bother", "わざわざ・・・する:（面倒をかける、を悩ませる）"],
-      ["seek", "（を）追い求める:（を得ようとする）"],
-      ["matter", "（が）重要「問題」だ"],
-      ["concentrate", "集中する、専念する"],
-      ["react", "反応「対応」する"],
-      ["struggle", "奮闘する:（人ともみ合う）"],
-      ["admit", "（を）（しぶしぶ）認める"],
-      ["lock", "をしまい込む、閉じ込める:（かぎをかける、かぎがかかる）"],
-      ["issue", "問題（点）:（発行、発行物）"],
-      ["relationship", "関係"],
-      ["list", "リスト、一覧（表）"],
-      ["item", "1品、1点:（項目、品目）"],
-      ["distance", "距離:（遠距離）"],
-      ["case", "場合:（事例、実情、事件、訴訟）"],
-      ["opinion", "意見、見解"],
-      ["century", "〜世紀"],
-      ["trouble", "困難（な事態）、困りごと:（面倒、もめごと）"],
-      ["total", "合計"],
-      ["advantage", "有利な点、強み:（長所）"],
-      ["detail", "細部:（詳細）"],
-      ["moment", "時点:（瞬間）"],
-      ["bill", "請求書:（紙幣）"],
-      ["rest", "残り:（休息、休止）"],
-      ["deal", "量:（取引）"],
-      ["feature", "特徴:（顔立ち、目鼻立ち）"],
-      ["survey", "調査"],
-      ["destination", "目的地、行き先"],
-      ["conclusion", "結論"],
-      ["attitude", "態度、考え方"],
-      ["impact", "影響（力）、衝撃"],
-      ["source", "源、原因:（出所）"],
-      ["row", "列、並び:（座席の列）"],
-      ["assistant", "助手、補佐"],
-      ["impression", "印象:（感じ）"],
-      ["noise", "騒音:（物音、音）"],
-      ["sign", "兆し、表れ:（しるし、標識、合図）"],
-      ["aim", "目的、目標:（狙い）"],
-      ["occasion", "（特定の）時:（機会、出来事）"],
-      ["relation", "関係、関連"],
-      ["signal", "合図:（信号、信号機）"],
-      ["balance", "バランス、均衡:（平衡「感覚」）"],
-      ["track", "小道"],
-      ["symbol", "象徴、シンボル:（記号）"],
-      ["circle", "仲間:（円、輪）"],
-      ["leisure", "余暇、自由な時間"],
-      ["angle", "観点、見方:（角度）"],
-      ["comfortable", "快適な:（心地よい）"],
-      ["recent", "最近の"],
-      ["real", "現実の、実在する:（真の、本物の）"],
-      ["dangerous", "危険な"],
-      ["current", "現在の、今の:（最新の）"],
-      ["final", "最後の:（最終的な）"],
-      ["obvious", "明らかな"],
-      ["fair", "妥当な、適正な:（公平な）"],
-      ["proud", "誇りに思って:（プライドの高い）"],
-      ["anxious", "切望して:（心配して、不安で）"],
-      ["impossible", "不可能な"],
-      ["opposite", "反対側の、向かい側の:（反対の）"],
-      ["terrible", "ひどい、恐ろしい"],
-      ["thick", "厚い:（濃い）"],
-      ["narrow", "狭い、細い:（ぎりぎりの、かろうじての）"]
-  ];
+    const predicateWords = [
+  ["bring about・・・/bring ・・・about","・・・を引き起こす、もたらす"],
+  ["catch up (with・・・)","(・・・に)追いつく"],
+  ["check out・・・/check ・・・ out","・・・を調べる:(・・・に注目する)"],
+  ["deal with ・・・","・・・に対処する、処理する"],
+  ["end up doing","最終的には・・・することになる"],
+  ["figure out ・・・/ figure ・・・out","・・・を理解する、解決する"],
+  ["fill in ・・・/ fill ・・・ in","・・・に記入する"],
+  ["get rid of ・・・","・・・を処分する、取り除く"],
+  ["have A in common(with B)","(Bと)共通のAを持つ"],
+  ["keep up with ・・・","・・・に(遅れずに)ついていく"],
+  ["A as well as B","BだけでなくAも"],
+  ["on the other hand","他方では"],
+  ["in spite of ～","～にもかかわらず"],
+  ["because of ～","～のために、～が原因で"],
+  ["on account of ～","～のために、～の理由で"],
+  ["due to ～","～のために、～が原因で"],
+  ["thanks to ～","～のおかげで；（批判的に）～のせいで"],
+  ["as a result","結果として"],
+  ["in any case [event]","いずれにしても；とにかく"],
+  ["in short","要約すると、手短に言うと"],
+  ["in particular","特に、とりわけ"],
+  ["that is (to say)","すなわち、より正確に言えば"],
+  ["in other words","言い換えると、つまり、要するに"],
+  ["to begin [start] with","まず第一に；最初は"],
+  ["in the first place","まず第一に；そもそも"],
+  ["in addition","その上、さらに"],
+  ["the moment [minute] (that) ...","...するとすぐに"],
+  ["by the way","ところで、それはそうと"],
+  ["as for ～","～については、～はどうかと言えば"],
+  ["in general","一般に、概して"],
+  ["on the whole","全体的に見て"],
+  ["for example [instance]","例えば"],
+  ["regardless of ～","～に関係なく，かまわず"],
+  ["to make matters worse","さらに悪いことに"],
+  ["with ease","容易に"],
+  ["a variety of ～","いろいろな～"],
+  ["as ～ as possible [one can]","できるだけ～"],
+  ["as if [though] ～","（まるで）…である（かのように）"],
+  ["by the time (that) ～","…するまでには"],
+  ["even if ～","たとえ～だとしても"],
+  ["now (that) ～","今や～だから，～である以上は"],
+  ["in a (one) sense","ある意味では"],
+  ["in case of ~","(もし)～の場合は"],
+  ["in contrast to/with ~","～とは対照的に"],
+  ["in one's opinion/view","～の考え[意見]では"],
+  ["in terms of ~","～の観点から"],
+  ["instead of ~","～の代わりに、～ではなくて"],
+  ["next to ~","～の隣に"],
+  ["no more than ~","わずか～、たった～"],
+  ["nothing but ~","ただ～だけ"],
+  ["out of order","故障して、調子が悪い"],
+  ["set up ~ / set ~ up","～(事業など)を始める、設立する"],
+  ["stay up","(寝ないで)起きている"],
+  ["take advantage of ~","～(機会など)を利用する、～(人)につけ込む"],
+  ["take in ~ / take ~ in","～(人)をだます"],
+  ["take over ~ / take ~ over","～(職務・責任など)を引き継ぐ、～(会社など)を買収する"],
+  ["turn down ~","～を拒む、断る"],
+  ["according to ~","～によれば"],
+  ["at (from) a distance","(場所的に)離れた所に[から]"],
+  ["by means of ~","～によって、～を用いて"],
+  ["for a moment","少しの間"],
+  ["look to A (for B)","Aに(Bを)期待する、当てにする"],
+  ["make sense","意味を成す、理解しやすい"],
+  ["make sure (that) ...","...(ということ)を確かめる"],
+  ["make up for ~","~の埋め合わせをする、~を償う"],
+  ["make up one's mind","決心する"],
+  ["never fail to do","必ず...する"],
+  ["result in ~","~という結果になる"],
+  ["set off (for ~)","(~に向けて)出発する"],
+  ["set out to do","(目的をもって)...し始める、...しようと試みる"],
+];
 
-  let order = [];
-  let current = -1;  // まだ出題していない状態
-  let showingMeaning = false;
+    let words = [];
+    let current = 0;
+    let showingAnswer = false;
+    let order = [];
 
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
+    const wordElem = document.getElementById("word");
+    const translationElem = document.getElementById("translation");
+    const counterElem = document.getElementById("counter");
+    const buttonsElem = document.getElementById("buttons");
+    const nextBtn = document.getElementById("nextBtn");
 
-  function updateProgress() {
-    const progressEl = document.getElementById("progress");
-    const total = words.length;
-    const count = current + 1; // 英単語を出した時点でカウント
-    progressEl.textContent = `問題数：${Math.min(count, total)} / ${total}`;
-  }
+    function startGame(mode) {
+      if (mode === "english") words = [...englishWords];
+      else if (mode === "predicate") words = [...predicateWords];
+      else words = [...englishWords, ...predicateWords];
 
-  function nextWord() {
-    const wordDiv = document.getElementById("word");
-    const meaningDiv = document.getElementById("meaning");
-    const endDiv = document.getElementById("endMessage");
-
-    if (words.length === 0) {
-      wordDiv.textContent = "単語リストが空です";
-      meaningDiv.textContent = "コード内の words[] に単語を追加してください。";
-      return;
-    }
-
-    // 新しい周の開始
-    if (order.length === 0) {
-      order = [...Array(words.length).keys()];
-      shuffle(order);
-      current = -1;
-      endDiv.textContent = "";
-    }
-
-    if (!showingMeaning) {
-      // 新しい単語を出題
-      current++;
-      if (current >= order.length) {
-        order = [];
-        endDiv.textContent = "終了";
-        updateProgress();
+      if (words.length === 0) {
+        wordElem.textContent = "⚠️ 単語リストが空です";
         return;
       }
-      const [en,] = words[order[current]];
-      wordDiv.textContent = en;
-      meaningDiv.textContent = "";
-      showingMeaning = true;
-    } else {
-      // 日本語訳を表示
-      const [, jp] = words[order[current]];
-      meaningDiv.textContent = jp;
-      showingMeaning = false;
+
+      order = [...Array(words.length).keys()];
+      shuffle(order);
+      current = 0;
+      showingAnswer = false;
+      buttonsElem.style.display = "none";
+      nextBtn.style.display = "inline-block";
+
+      showWord();
     }
 
-    updateProgress();
-  }
+    function showWord() {
+      const [en, jp] = words[order[current]];
+      wordElem.textContent = en;
+      translationElem.textContent = showingAnswer ? jp : "";
+      counterElem.textContent = `${current + 1} / ${words.length}`;
+    }
 
-  document.getElementById("nextBtn").addEventListener("click", nextWord);
-  updateProgress();
-</script>
+    function nextStep() {
+      if (words.length === 0) return;
 
+      if (!showingAnswer) {
+        showingAnswer = true;
+        showWord();
+      } else {
+        showingAnswer = false;
+        current++;
+        if (current < words.length) {
+          showWord();
+        } else {
+          endRound();
+        }
+      }
+    }
+
+    function endRound() {
+      wordElem.innerHTML = '<span class="end">終了</span>';
+      translationElem.textContent = "";
+      counterElem.textContent = "";
+      nextBtn.style.display = "none";
+      buttonsElem.style.display = "block";
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+  </script>
 </body>
 </html>
